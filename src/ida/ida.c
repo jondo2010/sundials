@@ -2408,6 +2408,13 @@ static int IDATestError(IDAMem IDA_mem, realtype ck,
   realtype enorm_k, enorm_km1, enorm_km2;   /* error norms */
   realtype terr_k, terr_km1, terr_km2;      /* local truncation error norms */
 
+  printf("--- IDATestError Before: let ck=%19.16g; let suppressalg=%i; let kk=%i\n", ck, IDA_mem->ida_suppressalg, IDA_mem->ida_kk);
+
+  printf("  let ida_phi= [\n"); for (int j = 0; j < MXORDP1; j++) { N_VPrint_Serial(IDA_mem->ida_phi[j]); } printf("  ];\n");
+  printf("  let ida_ee= [\n"); N_VPrint_Serial(IDA_mem->ida_ee); printf("  ];\n");
+  printf("  let ida_ewt= [\n"); N_VPrint_Serial(IDA_mem->ida_ewt); printf("  ];\n");
+  printf("  let ida_sigma= ["); for (int j=0; j<MXORDP1; j++) { printf("%19.16g,", IDA_mem->ida_sigma[j]);} printf("  ];\n");
+
   /* Compute error for order k. */
   enorm_k = IDAWrmsNorm(IDA_mem, IDA_mem->ida_ee, IDA_mem->ida_ewt, IDA_mem->ida_suppressalg);
   *err_k = IDA_mem->ida_sigma[IDA_mem->ida_kk] * enorm_k;
@@ -2448,6 +2455,10 @@ static int IDATestError(IDAMem IDA_mem, realtype ck,
 
   }
 
+  int nflag = (ck * enorm_k > ONE);
+
+  printf("--- IDATestError After: let knew=%i; err_k=%19.16g; err_km1=%19.16g; nflag=%i\n", IDA_mem->ida_knew, *err_k, *err_km1, nflag);
+
   /* Perform error test */
   if (ck * enorm_k > ONE) return(ERROR_TEST_FAIL);
   else                    return(IDA_SUCCESS);
@@ -2464,12 +2475,20 @@ static void IDARestore(IDAMem IDA_mem, realtype saved_t)
 {
   int j;
 
+  //printf("--- IDARestore Before: let saved_t=%19.16g tn=%19.16g ns=%i kk=%i hh=%19.16g\n", saved_t, IDA_mem->ida_tn, IDA_mem->ida_ns, IDA_mem->ida_kk, IDA_mem->ida_hh);
+
+  //printf("  let phi_before= [\n"); for (j = 0; j < MXORDP1; j++) { N_VPrint_Serial(IDA_mem->ida_phi[j]); } printf("  ];\n");
+  //printf("  let psi_before= [%19.16g, %19.16g, %19.16g, %19.16g, %19.16g, %19.16g];\n", IDA_mem->ida_psi[0], IDA_mem->ida_psi[1], IDA_mem->ida_psi[2],IDA_mem->ida_psi[3],IDA_mem->ida_psi[4],IDA_mem->ida_psi[5]);
+  //printf("  let cvals_before= [%19.16g, %19.16g, %19.16g, %19.16g, %19.16g, %19.16g];\n", IDA_mem->ida_cvals[0], IDA_mem->ida_cvals[1], IDA_mem->ida_cvals[2],IDA_mem->ida_cvals[3],IDA_mem->ida_cvals[4],IDA_mem->ida_cvals[5]);
+  //printf("  let beta_before = [%19.16g, %19.16g, %19.16g, %19.16g, %19.16g, %19.16g];\n", IDA_mem->ida_beta[0], IDA_mem->ida_beta[1], IDA_mem->ida_beta[2],IDA_mem->ida_beta[3],IDA_mem->ida_beta[4],IDA_mem->ida_beta[5]);
+
   IDA_mem->ida_tn = saved_t;
 
   for (j = 1; j <= IDA_mem->ida_kk; j++)
     IDA_mem->ida_psi[j-1] = IDA_mem->ida_psi[j] - IDA_mem->ida_hh;
 
   if (IDA_mem->ida_ns <= IDA_mem->ida_kk) {
+    printf("hello\n");
 
     for (j = IDA_mem->ida_ns; j <= IDA_mem->ida_kk; j++)
       IDA_mem->ida_cvals[j-IDA_mem->ida_ns] = ONE/IDA_mem->ida_beta[j];
@@ -2480,6 +2499,14 @@ static void IDARestore(IDAMem IDA_mem, realtype saved_t)
                                IDA_mem->ida_phi+IDA_mem->ida_ns);
   }
 
+  //printf("--- IDARestore After: saved_t=%19.16g tn=%19.16g ns=%i kk=%i\n", saved_t, IDA_mem->ida_tn, IDA_mem->ida_ns, IDA_mem->ida_kk);
+
+  //printf("  let phi_after= [\n"); for (j = 0; j < MXORDP1; j++) { N_VPrint_Serial(IDA_mem->ida_phi[j]); } printf("  ];\n");
+  //printf("  let psi_after= [%19.16g, %19.16g, %19.16g, %19.16g, %19.16g, %19.16g];\n", IDA_mem->ida_psi[0], IDA_mem->ida_psi[1], IDA_mem->ida_psi[2],IDA_mem->ida_psi[3],IDA_mem->ida_psi[4],IDA_mem->ida_psi[5]);
+  //printf("  let cvals_after= [%19.16g, %19.16g, %19.16g, %19.16g, %19.16g, %19.16g];\n", IDA_mem->ida_cvals[0], IDA_mem->ida_cvals[1], IDA_mem->ida_cvals[2],IDA_mem->ida_cvals[3],IDA_mem->ida_cvals[4],IDA_mem->ida_cvals[5]);
+  //printf("  let beta_after= [%19.16g, %19.16g, %19.16g, %19.16g, %19.16g, %19.16g];\n", IDA_mem->ida_beta[0], IDA_mem->ida_beta[1], IDA_mem->ida_beta[2],IDA_mem->ida_beta[3],IDA_mem->ida_beta[4],IDA_mem->ida_beta[5]);
+
+  //printf("--- IDARestore Done\n");
 }
 
 /*
