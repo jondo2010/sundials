@@ -2408,12 +2408,12 @@ static int IDATestError(IDAMem IDA_mem, realtype ck,
   realtype enorm_k, enorm_km1, enorm_km2;   /* error norms */
   realtype terr_k, terr_km1, terr_km2;      /* local truncation error norms */
 
-  printf("--- IDATestError Before: let ck=%19.16g; let suppressalg=%i; let kk=%i\n", ck, IDA_mem->ida_suppressalg, IDA_mem->ida_kk);
+  //printf("--- IDATestError Before: let ck=%19.16g; let suppressalg=%i; let kk=%i\n", ck, IDA_mem->ida_suppressalg, IDA_mem->ida_kk);
 
-  printf("  let ida_phi= [\n"); for (int j = 0; j < MXORDP1; j++) { N_VPrint_Serial(IDA_mem->ida_phi[j]); } printf("  ];\n");
-  printf("  let ida_ee= [\n"); N_VPrint_Serial(IDA_mem->ida_ee); printf("  ];\n");
-  printf("  let ida_ewt= [\n"); N_VPrint_Serial(IDA_mem->ida_ewt); printf("  ];\n");
-  printf("  let ida_sigma= ["); for (int j=0; j<MXORDP1; j++) { printf("%19.16g,", IDA_mem->ida_sigma[j]);} printf("  ];\n");
+  //printf("  let ida_phi= [\n"); for (int j = 0; j < MXORDP1; j++) { N_VPrint_Serial(IDA_mem->ida_phi[j]); } printf("  ];\n");
+  //printf("  let ida_ee= [\n"); N_VPrint_Serial(IDA_mem->ida_ee); printf("  ];\n");
+  //printf("  let ida_ewt= [\n"); N_VPrint_Serial(IDA_mem->ida_ewt); printf("  ];\n");
+  //printf("  let ida_sigma= ["); for (int j=0; j<MXORDP1; j++) { printf("%19.16g,", IDA_mem->ida_sigma[j]);} printf("  ];\n");
 
   /* Compute error for order k. */
   enorm_k = IDAWrmsNorm(IDA_mem, IDA_mem->ida_ee, IDA_mem->ida_ewt, IDA_mem->ida_suppressalg);
@@ -2457,7 +2457,7 @@ static int IDATestError(IDAMem IDA_mem, realtype ck,
 
   int nflag = (ck * enorm_k > ONE);
 
-  printf("--- IDATestError After: let knew=%i; err_k=%19.16g; err_km1=%19.16g; nflag=%i\n", IDA_mem->ida_knew, *err_k, *err_km1, nflag);
+  //printf("--- IDATestError After: let knew=%i; err_k=%19.16g; err_km1=%19.16g; nflag=%i\n", IDA_mem->ida_knew, *err_k, *err_km1, nflag);
 
   /* Perform error test */
   if (ck * enorm_k > ONE) return(ERROR_TEST_FAIL);
@@ -2652,6 +2652,64 @@ static void IDAReset(IDAMem IDA_mem)
   N_VScale(IDA_mem->ida_rr, IDA_mem->ida_phi[1], IDA_mem->ida_phi[1]);
 }
 
+void Serialize(IDAMem IDA_mem)
+{
+  printf("  let ida_phi = array![\n"); for (int j = 0; j < MXORDP1; j++) { N_VPrint_Serial(IDA_mem->ida_phi[j]); } printf("  ];\n");
+  printf("  let ida_psi = array!["); for (int j=0; j<MXORDP1; j++) { printf("%.16f,", IDA_mem->ida_psi[j]);} printf("  ];\n");
+  printf("  let ida_alpha = array!["); for (int j=0; j<MXORDP1; j++) { printf("%.16f,", IDA_mem->ida_alpha[j]);} printf("  ];\n");
+  printf("  let ida_beta = array!["); for (int j=0; j<MXORDP1; j++) { printf("%.16f,", IDA_mem->ida_beta[j]);} printf("  ];\n");
+  printf("  let ida_sigma = array!["); for (int j=0; j<MXORDP1; j++) { printf("%.16f,", IDA_mem->ida_sigma[j]);} printf("  ];\n");
+  printf("  let ida_gamma = array!["); for (int j=0; j<MXORDP1; j++) { printf("%.16f,", IDA_mem->ida_gamma[j]);} printf("  ];\n");
+  printf("  let ida_yy = "); N_VPrint_Serial(IDA_mem->ida_yy); printf(";\n");
+  printf("  let ida_yp = "); N_VPrint_Serial(IDA_mem->ida_yp); printf(";\n");
+  printf("  let ida_yypredict = "); N_VPrint_Serial(IDA_mem->ida_yypredict); printf(";\n");
+  printf("  let ida_yppredict = "); N_VPrint_Serial(IDA_mem->ida_yppredict); printf(";\n");
+  printf("  let ida_delta = "); N_VPrint_Serial(IDA_mem->ida_delta); printf(";\n");
+  //printf("  let ida_id = "); N_VPrint_Serial(IDA_mem->ida_id); printf(";\n");
+  //printf("  let ida_constraints = "); N_VPrint_Serial(IDA_mem->ida_constraints); printf(";\n");
+  printf("  let ida_saves = "); N_VPrint_Serial(IDA_mem->ida_savres); printf(";\n");
+  printf("  let ida_ee = "); N_VPrint_Serial(IDA_mem->ida_ee); printf(";\n");
+  //printf("  let ida_mm = "); N_VPrint_Serial(IDA_mem->ida_mm); printf(";\n");
+  printf("  let ida_ewt = "); N_VPrint_Serial(IDA_mem->ida_ewt); printf(";\n");
+  //printf("  let ida_Xvecs = array![\n"); for (int j = 0; j < MXORDP1; j++) { N_VPrint_Serial(IDA_mem->ida_Xvecs[j]); } printf("  ];\n");
+  //printf("  let ida_Zvecs = array![\n"); for (int j = 0; j < MXORDP1; j++) { N_VPrint_Serial(IDA_mem->ida_Zvecs[j]); } printf("  ];\n");
+
+  printf("  let hh=%.16f;\n", IDA_mem->ida_hh);
+
+  printf("  let kk=%i;\n", IDA_mem->ida_kk);
+  printf("  let kused=%i;\n", IDA_mem->ida_kused);
+  printf("  let knew=%i;\n", IDA_mem->ida_knew);
+  printf("  let phase=%i;\n", IDA_mem->ida_phase);
+  printf("  let ns=%i;\n", IDA_mem->ida_ns);
+
+  printf("  let hin=%.16f;\n", IDA_mem->ida_hin);
+  printf("  let h0u=%.16f;\n", IDA_mem->ida_h0u);
+  printf("  let hh=%.16f;\n", IDA_mem->ida_hh);
+  printf("  let hused=%.16f;\n", IDA_mem->ida_hused);
+  printf("  let rr=%.16f;\n", IDA_mem->ida_rr);
+  printf("  let tn=%.16f;\n", IDA_mem->ida_tn);
+  printf("  let tretlast=%.16f;\n", IDA_mem->ida_tretlast);
+  printf("  let cj=%.16f;\n", IDA_mem->ida_cj);
+  printf("  let cjlast=%.16f;\n", IDA_mem->ida_cjlast);
+  printf("  let cjold=%.16f;\n", IDA_mem->ida_cjold);
+  printf("  let cjratio=%.16f;\n", IDA_mem->ida_cjratio);
+  printf("  let ss=%.16f;\n", IDA_mem->ida_ss);
+  printf("  let oldnrm=%.16f;\n", IDA_mem->ida_oldnrm);
+  printf("  let epsNewt=%.16f;\n", IDA_mem->ida_epsNewt);
+  printf("  let epcon=%.16f;\n", IDA_mem->ida_epcon);
+  printf("  let toldel=%.16f;\n", IDA_mem->ida_toldel);
+  printf("  let hmax_inv=%.16f;\n", IDA_mem->ida_hmax_inv);
+
+  printf("  let nst=%i;\n", IDA_mem->ida_nst);
+  printf("  let nre=%i;\n", IDA_mem->ida_nre);
+  printf("  let ncfn=%i;\n", IDA_mem->ida_ncfn);
+  printf("  let netf=%i;\n", IDA_mem->ida_netf);
+  printf("  let nni=%i;\n", IDA_mem->ida_nni);
+  printf("  let nsetups=%i;\n", IDA_mem->ida_nsetups);
+
+  printf("  let maxord=%i;\n", IDA_mem->ida_maxord);
+}
+
 /*
  * -----------------------------------------------------------------
  * Function called after a successful step
@@ -2672,6 +2730,9 @@ static void IDACompleteStep(IDAMem IDA_mem, realtype err_k, realtype err_km1)
   realtype terr_k, terr_km1, terr_kp1;
   realtype err_knew, err_kp1;
   realtype enorm, tmp, hnew;
+
+  printf("--- IDAGetSolution Before: let err_k=%.16g; let err_km1=%.16g;\n", err_k, err_km1);
+  Serialize(IDA_mem);
 
   IDA_mem->ida_nst++;
   kdiff = IDA_mem->ida_kk - IDA_mem->ida_kused;
@@ -2784,6 +2845,10 @@ static void IDACompleteStep(IDAMem IDA_mem, realtype err_k, realtype err_km1)
                                  ONE, IDA_mem->ida_Xvecs,
                                  ONE, IDA_mem->ida_Zvecs,
                                  IDA_mem->ida_Xvecs);
+
+  printf("--- IDAGetSolution After:\n");
+  Serialize(IDA_mem);
+  printf("--- Done\n");
 }
 
 /*
@@ -2820,6 +2885,12 @@ int IDAGetSolution(void *ida_mem, realtype t, N_Vector yret, N_Vector ypret)
     return (IDA_MEM_NULL);
   }
   IDA_mem = (IDAMem) ida_mem;
+
+  //printf("--- IDAGetSolution Before: let t=%19.16g;", t);
+  //printf("let hh=%19.16g; let tn=%19.16g; let kused=%i; let hused=%19.16g;\n", IDA_mem->ida_hh, IDA_mem->ida_tn, IDA_mem->ida_kused, IDA_mem->ida_hused);
+
+  //printf("  let ida_phi = [\n"); for (int j = 0; j < MXORDP1; j++) { N_VPrint_Serial(IDA_mem->ida_phi[j]); } printf("  ];\n");
+  //printf("  let ida_psi = ["); for (int j=0; j<MXORDP1; j++) { printf("%19.16g,", IDA_mem->ida_psi[j]);} printf("  ];\n");
 
   /* Check t for legality.  Here tn - hused is t_{n-1}. */
 
@@ -2861,6 +2932,11 @@ int IDAGetSolution(void *ida_mem, realtype t, N_Vector yret, N_Vector ypret)
   retval = N_VLinearCombination(kord, IDA_mem->ida_dvals,
                                 IDA_mem->ida_phi+1, ypret);
   if (retval != IDA_SUCCESS) return(IDA_VECTOROP_ERR);
+
+  //printf("--- IDAGetSolution After: \n");
+  //printf("  let yret = [\n"); N_VPrint_Serial(yret); printf("  ];\n");
+  //printf("  let ypret = [\n"); N_VPrint_Serial(ypret); printf("  ];\n");
+  //printf("--- IDAGetSolution Done\n");
 
   return(IDA_SUCCESS);
 }
