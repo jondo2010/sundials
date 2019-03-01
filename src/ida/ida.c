@@ -2198,6 +2198,9 @@ static void IDASetCoeffs(IDAMem IDA_mem, realtype *ck)
 
   /* Set coefficients for the current stepsize h */
 
+  printf("--- IDASetCoeffs Before\n");
+  Serialize(IDA_mem);
+
   if (IDA_mem->ida_hh != IDA_mem->ida_hused || IDA_mem->ida_kk != IDA_mem->ida_kused)
     IDA_mem->ida_ns = 0;
   IDA_mem->ida_ns = SUNMIN(IDA_mem->ida_ns+1, IDA_mem->ida_kused+2);
@@ -2244,6 +2247,9 @@ static void IDASetCoeffs(IDAMem IDA_mem, realtype *ck)
                                IDA_mem->ida_phi+IDA_mem->ida_ns,
                                IDA_mem->ida_phi+IDA_mem->ida_ns);
 
+  printf("--- IDASetCoeffs After let ck=%.19g\n", *ck);
+  Serialize(IDA_mem);
+  printf("--- IDASetCoeffs Done\n");
 }
 
 /*
@@ -2375,6 +2381,9 @@ static void IDAPredict(IDAMem IDA_mem)
 {
   int j;
 
+  //printf("--- IDAPredict Before\n");
+  //Serialize(IDA_mem);
+
   for(j=0; j<=IDA_mem->ida_kk; j++)
     IDA_mem->ida_cvals[j] = ONE;
 
@@ -2383,6 +2392,10 @@ static void IDAPredict(IDAMem IDA_mem)
 
   (void) N_VLinearCombination(IDA_mem->ida_kk, IDA_mem->ida_gamma+1,
                               IDA_mem->ida_phi+1, IDA_mem->ida_yppredict);
+                  
+  //printf("--- IDAPredict After\n");
+  //Serialize(IDA_mem);
+  //printf("--- IDAPredict Done\n");
 }
 
 /*
@@ -2488,8 +2501,6 @@ static void IDARestore(IDAMem IDA_mem, realtype saved_t)
     IDA_mem->ida_psi[j-1] = IDA_mem->ida_psi[j] - IDA_mem->ida_hh;
 
   if (IDA_mem->ida_ns <= IDA_mem->ida_kk) {
-    printf("hello\n");
-
     for (j = IDA_mem->ida_ns; j <= IDA_mem->ida_kk; j++)
       IDA_mem->ida_cvals[j-IDA_mem->ida_ns] = ONE/IDA_mem->ida_beta[j];
 
@@ -2655,11 +2666,11 @@ static void IDAReset(IDAMem IDA_mem)
 void Serialize(IDAMem IDA_mem)
 {
   printf("  let ida_phi = array![\n"); for (int j = 0; j < MXORDP1; j++) { N_VPrint_Serial(IDA_mem->ida_phi[j]); } printf("  ];\n");
-  printf("  let ida_psi = array!["); for (int j=0; j<MXORDP1; j++) { printf("%.16f,", IDA_mem->ida_psi[j]);} printf("  ];\n");
-  printf("  let ida_alpha = array!["); for (int j=0; j<MXORDP1; j++) { printf("%.16f,", IDA_mem->ida_alpha[j]);} printf("  ];\n");
-  printf("  let ida_beta = array!["); for (int j=0; j<MXORDP1; j++) { printf("%.16f,", IDA_mem->ida_beta[j]);} printf("  ];\n");
-  printf("  let ida_sigma = array!["); for (int j=0; j<MXORDP1; j++) { printf("%.16f,", IDA_mem->ida_sigma[j]);} printf("  ];\n");
-  printf("  let ida_gamma = array!["); for (int j=0; j<MXORDP1; j++) { printf("%.16f,", IDA_mem->ida_gamma[j]);} printf("  ];\n");
+  printf("  let ida_psi = array!["); for (int j=0; j<MXORDP1; j++) { printf("%.16e,", IDA_mem->ida_psi[j]);} printf("  ];\n");
+  printf("  let ida_alpha = array!["); for (int j=0; j<MXORDP1; j++) { printf("%.16e,", IDA_mem->ida_alpha[j]);} printf("  ];\n");
+  printf("  let ida_beta = array!["); for (int j=0; j<MXORDP1; j++) { printf("%.16e,", IDA_mem->ida_beta[j]);} printf("  ];\n");
+  printf("  let ida_sigma = array!["); for (int j=0; j<MXORDP1; j++) { printf("%.16e,", IDA_mem->ida_sigma[j]);} printf("  ];\n");
+  printf("  let ida_gamma = array!["); for (int j=0; j<MXORDP1; j++) { printf("%.16e,", IDA_mem->ida_gamma[j]);} printf("  ];\n");
   printf("  let ida_yy = "); N_VPrint_Serial(IDA_mem->ida_yy); printf(";\n");
   printf("  let ida_yp = "); N_VPrint_Serial(IDA_mem->ida_yp); printf(";\n");
   printf("  let ida_yypredict = "); N_VPrint_Serial(IDA_mem->ida_yypredict); printf(";\n");
@@ -2682,23 +2693,23 @@ void Serialize(IDAMem IDA_mem)
   printf("  let phase=%i;\n", IDA_mem->ida_phase);
   printf("  let ns=%i;\n", IDA_mem->ida_ns);
 
-  printf("  let hin=%.16f;\n", IDA_mem->ida_hin);
-  printf("  let h0u=%.16f;\n", IDA_mem->ida_h0u);
-  printf("  let hh=%.16f;\n", IDA_mem->ida_hh);
-  printf("  let hused=%.16f;\n", IDA_mem->ida_hused);
-  printf("  let rr=%.16f;\n", IDA_mem->ida_rr);
-  printf("  let tn=%.16f;\n", IDA_mem->ida_tn);
-  printf("  let tretlast=%.16f;\n", IDA_mem->ida_tretlast);
-  printf("  let cj=%.16f;\n", IDA_mem->ida_cj);
-  printf("  let cjlast=%.16f;\n", IDA_mem->ida_cjlast);
-  printf("  let cjold=%.16f;\n", IDA_mem->ida_cjold);
-  printf("  let cjratio=%.16f;\n", IDA_mem->ida_cjratio);
-  printf("  let ss=%.16f;\n", IDA_mem->ida_ss);
-  printf("  let oldnrm=%.16f;\n", IDA_mem->ida_oldnrm);
-  printf("  let epsNewt=%.16f;\n", IDA_mem->ida_epsNewt);
-  printf("  let epcon=%.16f;\n", IDA_mem->ida_epcon);
-  printf("  let toldel=%.16f;\n", IDA_mem->ida_toldel);
-  printf("  let hmax_inv=%.16f;\n", IDA_mem->ida_hmax_inv);
+  printf("  let hin=%.16e;\n", IDA_mem->ida_hin);
+  printf("  let h0u=%.16e;\n", IDA_mem->ida_h0u);
+  printf("  let hh=%.16e;\n", IDA_mem->ida_hh);
+  printf("  let hused=%.16e;\n", IDA_mem->ida_hused);
+  printf("  let rr=%.16e;\n", IDA_mem->ida_rr);
+  printf("  let tn=%.16e;\n", IDA_mem->ida_tn);
+  printf("  let tretlast=%.16e;\n", IDA_mem->ida_tretlast);
+  printf("  let cj=%.16e;\n", IDA_mem->ida_cj);
+  printf("  let cjlast=%.16e;\n", IDA_mem->ida_cjlast);
+  printf("  let cjold=%.16e;\n", IDA_mem->ida_cjold);
+  printf("  let cjratio=%.16e;\n", IDA_mem->ida_cjratio);
+  printf("  let ss=%.16e;\n", IDA_mem->ida_ss);
+  printf("  let oldnrm=%.16e;\n", IDA_mem->ida_oldnrm);
+  printf("  let epsNewt=%.16e;\n", IDA_mem->ida_epsNewt);
+  printf("  let epcon=%.16e;\n", IDA_mem->ida_epcon);
+  printf("  let toldel=%.16e;\n", IDA_mem->ida_toldel);
+  printf("  let hmax_inv=%.16e;\n", IDA_mem->ida_hmax_inv);
 
   printf("  let nst=%i;\n", IDA_mem->ida_nst);
   printf("  let nre=%i;\n", IDA_mem->ida_nre);
@@ -2731,8 +2742,8 @@ static void IDACompleteStep(IDAMem IDA_mem, realtype err_k, realtype err_km1)
   realtype err_knew, err_kp1;
   realtype enorm, tmp, hnew;
 
-  printf("--- IDAGetSolution Before: let err_k=%.16g; let err_km1=%.16g;\n", err_k, err_km1);
-  Serialize(IDA_mem);
+  //printf("--- IDAGetSolution Before: let err_k=%.16g; let err_km1=%.16g;\n", err_k, err_km1);
+  //Serialize(IDA_mem);
 
   IDA_mem->ida_nst++;
   kdiff = IDA_mem->ida_kk - IDA_mem->ida_kused;
@@ -2846,9 +2857,9 @@ static void IDACompleteStep(IDAMem IDA_mem, realtype err_k, realtype err_km1)
                                  ONE, IDA_mem->ida_Zvecs,
                                  IDA_mem->ida_Xvecs);
 
-  printf("--- IDAGetSolution After:\n");
-  Serialize(IDA_mem);
-  printf("--- Done\n");
+  //printf("--- IDAGetSolution After:\n");
+  //Serialize(IDA_mem);
+  //printf("--- Done\n");
 }
 
 /*
