@@ -230,8 +230,13 @@ int LSolve(N_Vector y, N_Vector b, void* mem)
   }
   Imem = (IntegratorMem) mem;
 
+  printf("LSolve b = ");
+  N_VPrint_Serial(b);
+  printf("\n");
+
   retval = SUNLinSolSolve(Imem->LS, Imem->A, Imem->x, b, ZERO);
   N_VScale(ONE, Imem->x, b);
+
 
   return(retval);
 }

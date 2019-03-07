@@ -243,6 +243,12 @@ int SUNNonlinSolSolve_Newton(SUNNonlinearSolver NLS,
       retval = NEWTON_CONTENT(NLS)->LSolve(y, delta, mem);
       if (retval != SUN_NLS_SUCCESS) break;
 
+      printf("niters = %i; y = ", NEWTON_CONTENT(NLS)->niters);
+      N_VPrint_Serial(y);
+      printf(" delta = ");
+      N_VPrint_Serial(delta);
+      printf("\n");
+
       /* update the Newton iterate */
       N_VLinearSum(ONE, y, ONE, delta, y);
 
